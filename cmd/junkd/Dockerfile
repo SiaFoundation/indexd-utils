@@ -16,7 +16,7 @@ FROM debian:bookworm-slim
 LABEL maintainer="The Sia Foundation <info@sia.tech>" \
     org.opencontainers.image.description.vendor="The Sia Foundation" \
     org.opencontainers.image.description="A test container for uploading random data to the Sia network" \
-    org.opencontainers.image.source="https://github.com/SiaFoundation/indexd/cmd/junkd" \
+    org.opencontainers.image.source="https://github.com/SiaFoundation/indexd-utils" \
     org.opencontainers.image.licenses=MIT
 
 # copy binary and certificates
