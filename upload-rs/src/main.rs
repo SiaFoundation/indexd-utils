@@ -16,6 +16,9 @@ async fn main() {
     pretty_env_logger::init();
     let input_path = env::args().nth(1).expect("no input_path given");
     let output_path = env::args().nth(2).expect("no output_path given");
+    let max_inflight_str = env::args().nth(3).expect("max_inflight is required");
+
+    let max_inflight: usize = max_inflight_str.parse().expect("failed to parse");
 
     let h: Hash256 = blake2b_simd::Params::new()
         .hash_length(32)
@@ -59,7 +62,7 @@ async fn main() {
     //info!("waiting 60s for host funding");
     //sleep(Duration::from_secs(60)).await; // wait for host funding
 
-    let uploader = Uploader::new(dialer.clone(), private_key.clone(), 5);
+    let uploader = Uploader::new(dialer.clone(), private_key.clone(), max_inflight);
 
     let input = File::open(input_path).await.expect("failed to open file");
     let encryption_key = rand::random();
