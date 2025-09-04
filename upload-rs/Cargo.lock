@@ -1025,7 +1025,7 @@ dependencies = [
 [[package]]
 name = "indexd"
 version = "0.0.1"
-source = "git+https://github.com/SiaFoundation/sia-sdk-rs.git?rev=7247bb71d7c5efc93e90557046185e73e80698e3#7247bb71d7c5efc93e90557046185e73e80698e3"
+source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=06def35ce659c67db583a1cd2f5a77b28b9a3f9c#06def35ce659c67db583a1cd2f5a77b28b9a3f9c"
 dependencies = [
  "blake2b_simd",
  "rand",
@@ -2041,7 +2041,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 [[package]]
 name = "sia-sdk-derive"
 version = "0.0.2"
-source = "git+https://github.com/SiaFoundation/sia-sdk-rs.git?rev=7247bb71d7c5efc93e90557046185e73e80698e3#7247bb71d7c5efc93e90557046185e73e80698e3"
+source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=06def35ce659c67db583a1cd2f5a77b28b9a3f9c#06def35ce659c67db583a1cd2f5a77b28b9a3f9c"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2051,7 +2051,7 @@ dependencies = [
 [[package]]
 name = "sia_sdk"
 version = "0.0.2"
-source = "git+https://github.com/SiaFoundation/sia-sdk-rs.git?rev=7247bb71d7c5efc93e90557046185e73e80698e3#7247bb71d7c5efc93e90557046185e73e80698e3"
+source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=06def35ce659c67db583a1cd2f5a77b28b9a3f9c#06def35ce659c67db583a1cd2f5a77b28b9a3f9c"
 dependencies = [
  "base64",
  "bip39",
