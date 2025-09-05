@@ -1025,16 +1025,19 @@ dependencies = [
 [[package]]
 name = "indexd"
 version = "0.0.1"
-source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=06def35ce659c67db583a1cd2f5a77b28b9a3f9c#06def35ce659c67db583a1cd2f5a77b28b9a3f9c"
+source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=9ceb0f81d3a81c82ecd1822e5dce5016385b9d00#9ceb0f81d3a81c82ecd1822e5dce5016385b9d00"
 dependencies = [
  "blake2b_simd",
  "rand",
  "reqwest",
+ "rustls",
+ "rustls-platform-verifier",
  "serde",
  "serde_json",
  "sia_sdk",
  "thiserror 2.0.16",
  "time",
+ "tokio",
  "url",
 ]
 
@@ -2041,7 +2044,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 [[package]]
 name = "sia-sdk-derive"
 version = "0.0.2"
-source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=06def35ce659c67db583a1cd2f5a77b28b9a3f9c#06def35ce659c67db583a1cd2f5a77b28b9a3f9c"
+source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=9ceb0f81d3a81c82ecd1822e5dce5016385b9d00#9ceb0f81d3a81c82ecd1822e5dce5016385b9d00"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2051,7 +2054,7 @@ dependencies = [
 [[package]]
 name = "sia_sdk"
 version = "0.0.2"
-source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=06def35ce659c67db583a1cd2f5a77b28b9a3f9c#06def35ce659c67db583a1cd2f5a77b28b9a3f9c"
+source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=9ceb0f81d3a81c82ecd1822e5dce5016385b9d00#9ceb0f81d3a81c82ecd1822e5dce5016385b9d00"
 dependencies = [
  "base64",
  "bip39",
