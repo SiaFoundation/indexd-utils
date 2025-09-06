@@ -25,13 +25,13 @@ async fn main() -> Result<(), Error> {
     let app_key = PrivateKey::from_seed(h.as_ref());
 
     let sdk = SDK::connect(
-            APP_URL,
-            app_key,
-            "upload-rs".into(),
-            "A simple upload tool ".into(),
-            "https://foo.bar".parse().unwrap(),
-        )
-        .await?;
+        APP_URL,
+        app_key,
+        "upload-rs".into(),
+        "A simple upload tool ".into(),
+        "https://foo.bar".parse().unwrap(),
+    )
+    .await?;
 
     if sdk.needs_approval() {
         info!("approve the app at: {}", sdk.approval_url().unwrap());
@@ -41,10 +41,10 @@ async fn main() -> Result<(), Error> {
     info!("app connected");
 
     info!("uploading file");
-    let mut input = File::open(input_path).await.expect("failed to open input");
+    let input = File::open(input_path).await.expect("failed to open input");
     let encryption_key: [u8; 32] = rand::random();
     let mut start = Instant::now();
-    let slabs = sdk.upload(&mut input, encryption_key, 10, 20).await?;
+    let slabs = sdk.upload(input, encryption_key, 10, 20).await?;
     info!(
         "upload {} complete in {}ms",
         slabs[0].length,
