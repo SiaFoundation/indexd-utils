@@ -907,7 +907,7 @@ dependencies = [
  "libc",
  "percent-encoding",
  "pin-project-lite",
- "socket2",
+ "socket2 0.6.0",
  "system-configuration",
  "tokio",
  "tower-service",
@@ -1025,9 +1025,14 @@ dependencies = [
 [[package]]
 name = "indexd"
 version = "0.0.1"
-source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=862b8bda02d5c9c26621ead0948e50dec5743799#862b8bda02d5c9c26621ead0948e50dec5743799"
+source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=84ec46b28d8c4101377d9754074933e342b32d31#84ec46b28d8c4101377d9754074933e342b32d31"
 dependencies = [
  "blake2b_simd",
+ "bytes",
+ "futures",
+ "log",
+ "priority-queue",
+ "quinn",
  "rand",
  "reqwest",
  "rustls",
@@ -1038,6 +1043,7 @@ dependencies = [
  "thiserror 2.0.16",
  "time",
  "tokio",
+ "tokio-util",
  "url",
 ]
 
@@ -1228,9 +1234,9 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.27"
+version = "0.4.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "13dc2df351e3202783a1fe0d44375f7295ffb4049267b0f3018346dc122a1d94"
+checksum = "34080505efa8e45a4b816c349525ebe327ceaa8559756f0356cba97ef3bf7432"
 
 [[package]]
 name = "lru"
@@ -1520,6 +1526,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "priority-queue"
+version = "2.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5676d703dda103cbb035b653a9f11448c0a7216c7926bd35fcb5865475d0c970"
+dependencies = [
+ "autocfg",
+ "equivalent",
+ "indexmap",
+]
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.101"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1530,9 +1547,9 @@ dependencies = [
 
 [[package]]
 name = "quinn"
-version = "0.11.9"
+version = "0.11.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9e20a958963c291dc322d98411f541009df2ced7b5a4f2bd52337638cfccf20"
+checksum = "626214629cda6781b6dc1d316ba307189c85ba657213ce642d9c77670f8202c8"
 dependencies = [
  "bytes",
  "cfg_aliases",
@@ -1541,7 +1558,7 @@ dependencies = [
  "quinn-udp",
  "rustc-hash 2.1.1",
  "rustls",
- "socket2",
+ "socket2 0.5.10",
  "thiserror 2.0.16",
  "tokio",
  "tracing",
@@ -1580,9 +1597,9 @@ dependencies = [
  "cfg_aliases",
  "libc",
  "once_cell",
- "socket2",
+ "socket2 0.6.0",
  "tracing",
- "windows-sys 0.52.0",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
@@ -2044,7 +2061,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 [[package]]
 name = "sia-sdk-derive"
 version = "0.0.2"
-source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=862b8bda02d5c9c26621ead0948e50dec5743799#862b8bda02d5c9c26621ead0948e50dec5743799"
+source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=84ec46b28d8c4101377d9754074933e342b32d31#84ec46b28d8c4101377d9754074933e342b32d31"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2054,7 +2071,7 @@ dependencies = [
 [[package]]
 name = "sia_sdk"
 version = "0.0.2"
-source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=862b8bda02d5c9c26621ead0948e50dec5743799#862b8bda02d5c9c26621ead0948e50dec5743799"
+source = "git+https://github.com/siafoundation/sia-sdk-rs.git?rev=84ec46b28d8c4101377d9754074933e342b32d31#84ec46b28d8c4101377d9754074933e342b32d31"
 dependencies = [
  "base64",
  "bip39",
@@ -2068,10 +2085,8 @@ dependencies = [
  "num-bigint",
  "num-rational",
  "num-traits",
- "quinn",
  "rayon",
  "reed-solomon-erasure",
- "rustls",
  "serde",
  "serde-big-array",
  "serde_json",
@@ -2110,6 +2125,16 @@ name = "smallvec"
 version = "1.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
+
+[[package]]
+name = "socket2"
+version = "0.5.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e22376abed350d73dd1cd119b57ffccad95b4e585a7cda43e286245ce23c0678"
+dependencies = [
+ "libc",
+ "windows-sys 0.52.0",
+]
 
 [[package]]
 name = "socket2"
@@ -2338,7 +2363,7 @@ dependencies = [
  "mio",
  "pin-project-lite",
  "slab",
- "socket2",
+ "socket2 0.6.0",
  "tokio-macros",
  "windows-sys 0.59.0",
 ]
@@ -2383,6 +2408,7 @@ dependencies = [
  "bytes",
  "futures-core",
  "futures-sink",
+ "futures-util",
  "pin-project-lite",
  "tokio",
 ]
