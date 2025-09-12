@@ -9,7 +9,7 @@ RUN go mod download
 # copy source
 COPY . .
 # build
-RUN go build -o bin/ -tags='netgo timetzdata' -trimpath -a -ldflags '-s -w'  ./
+RUN go build -o bin/junkd -tags='netgo timetzdata' -trimpath -a -ldflags '-s -w'  ./
 
 FROM debian:bookworm-slim
 
@@ -20,7 +20,7 @@ LABEL maintainer="The Sia Foundation <info@sia.tech>" \
     org.opencontainers.image.licenses=MIT
 
 # copy binary and certificates
-COPY --from=builder /junkd/bin/* /usr/bin/
+COPY --from=builder /junkd/bin/junkd /usr/bin/junkd
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 ENTRYPOINT [ "junkd" ]
