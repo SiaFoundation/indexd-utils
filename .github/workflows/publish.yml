@@ -13,8 +13,6 @@ concurrency:
 jobs:
   docker:
     name: Publish Docker
-    needs:
-      - test
     runs-on: ubuntu-latest
     permissions:
       packages: write
