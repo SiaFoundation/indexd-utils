@@ -9,7 +9,7 @@ RUN go mod download
 # copy source
 COPY . .
 # build
-RUN go build -o bin/ -tags='netgo timetzdata' -trimpath -a -ldflags '-s -w'  ./cmd/junkd
+RUN go build -o bin/ -tags='netgo timetzdata' -trimpath -a -ldflags '-s -w'  ./
 
 FROM debian:bookworm-slim
 
