@@ -29,8 +29,9 @@ import (
 )
 
 const (
-	statsInterval = time.Minute
-	statsAlpha    = 0.3 // EMA smoothing factor
+	sampleInterval = time.Second
+	printInterval  = 30 * time.Second
+	windowSize     = 300
 )
 
 type config struct {
@@ -38,22 +39,13 @@ type config struct {
 	indexerURL    string
 	redundancyStr string
 
-	logLevel zap.AtomicLevel
-	logPath  string
-
 	threads     int
 	slabs       int
 	hostTimeout time.Duration
+
+	logLevel zap.AtomicLevel
+	logPath  string
 }
-
-var (
-	// derived from flags (defaults here as fallbacks)
-	dataShards   uint8 = 2
-	parityShards uint8 = 4
-
-	throughput atomic.Int64 // bytes uploaded (redundant) since last tick
-	ema        float64      // mbps EMA (written only by stats goroutine)
-)
 
 func main() {
 	cfg := parseFlags()
@@ -65,13 +57,14 @@ func main() {
 	}
 	defer func() { _ = log.Sync() }()
 
+	dataShards, parityShards, err := parseRedundancy(cfg.redundancyStr)
+	if err != nil {
+		log.Fatal("failed to parse redundancy", zap.Error(err))
+	}
+
 	sk, err := loadPrivateKey(cfg.appSecret)
 	if err != nil {
 		log.Fatal("failed to load private key", zap.Error(err))
-	}
-
-	if err := parseRedundancy(cfg.redundancyStr); err != nil {
-		log.Fatal("failed to parse redundancy", zap.Error(err))
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -113,7 +106,8 @@ func main() {
 	}
 
 	// stats goroutine
-	go printUploadSpeed(ctx, log)
+	var counter atomic.Uint64
+	go printUploadSpeed(ctx, &counter, log)
 
 	// upload workers
 	var wg sync.WaitGroup
@@ -123,7 +117,7 @@ func main() {
 			defer wg.Done()
 			workerLog := log.Named(fmt.Sprintf("upload-thread-%d", n))
 			workerLog.Debug("starting upload thread")
-			uploadWorker(ctx, sdkClient, workerLog, dataSizePerBatch, redundantSizePerBatch, cfg.hostTimeout)
+			uploadWorker(ctx, sdkClient, dataShards, parityShards, dataSizePerBatch, redundantSizePerBatch, cfg.hostTimeout, &counter, workerLog)
 			workerLog.Debug("shutting down upload thread")
 		}(n)
 	}
@@ -132,7 +126,7 @@ func main() {
 	log.Info("all upload threads finished, exiting")
 }
 
-func uploadWorker(ctx context.Context, sdkClient *sdk.SDK, log *zap.Logger, dataSizePerBatch, redundantSizePerBatch int64, hostTimeout time.Duration) {
+func uploadWorker(ctx context.Context, sdkClient *sdk.SDK, dataShards, parityShards uint8, dataSizePerBatch, redundantSizePerBatch int64, hostTimeout time.Duration, counter *atomic.Uint64, log *zap.Logger) {
 	retryDelay := 5 * time.Minute
 
 	for {
@@ -154,7 +148,7 @@ func uploadWorker(ctx context.Context, sdkClient *sdk.SDK, log *zap.Logger, data
 
 		switch {
 		case err == nil:
-			throughput.Add(redundantSizePerBatch)
+			counter.Add(uint64(redundantSizePerBatch))
 			log.Info("upload completed", zap.Duration("duration", time.Since(start)))
 		case errors.Is(err, context.Canceled):
 			return
@@ -172,28 +166,56 @@ func uploadWorker(ctx context.Context, sdkClient *sdk.SDK, log *zap.Logger, data
 	}
 }
 
-func printUploadSpeed(ctx context.Context, log *zap.Logger) {
-	ticker := time.NewTicker(statsInterval)
-	defer ticker.Stop()
+func printUploadSpeed(ctx context.Context, bytesCounter *atomic.Uint64, log *zap.Logger) {
+	sampleTicker := time.NewTicker(sampleInterval)
+	printTicker := time.NewTicker(printInterval)
+	defer sampleTicker.Stop()
+	defer printTicker.Stop()
+
+	buf := make([]float64, windowSize)
+	idx := 0
+	filled := 0
+
+	avgLast := func(n int) float64 {
+		if n > filled {
+			n = filled
+		}
+		if n == 0 {
+			return 0
+		}
+		sum := 0.0
+		for i := 0; i < n; i++ {
+			j := (idx - 1 - i + windowSize) % windowSize
+			sum += buf[j]
+		}
+		return sum / float64(n)
+	}
 
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		case <-ticker.C:
-			uploaded := throughput.Swap(0) // bytes in the last interval
-			seconds := statsInterval.Seconds()
-			mbps := (float64(uploaded) * 8) / 1_000_000 / seconds
 
-			if ema == 0 {
-				ema = mbps
-			} else {
-				ema = statsAlpha*mbps + (1-statsAlpha)*ema
+		case <-sampleTicker.C:
+			uploaded := bytesCounter.Swap(0)
+			mbps := float64(uploaded) * 8 / 1000000
+			buf[idx] = mbps
+			idx = (idx + 1) % windowSize
+			if filled < windowSize {
+				filled++
 			}
 
+		case <-printTicker.C:
+			instant := 0.0
+			if filled > 0 {
+				instant = buf[(idx-1+windowSize)%windowSize]
+			}
 			log.Info("upload speed",
-				zap.Float64("mbps_instant", mbps),
-				zap.Float64("mbps_ema", ema),
+				zap.String("mbps_instant", fmt.Sprintf("%.2f", instant)),
+				zap.String("mbps_avg_5s", fmt.Sprintf("%.2f", avgLast(5))),
+				zap.String("mbps_avg_60s", fmt.Sprintf("%.2f", avgLast(60))),
+				zap.String("mbps_avg_300s", fmt.Sprintf("%.2f", avgLast(300))),
+				zap.Int("samples", filled),
 			)
 		}
 	}
@@ -212,28 +234,23 @@ func loadPrivateKey(appSecret string) (types.PrivateKey, error) {
 	return wallet.KeyFromSeed(&seed, 0), nil
 }
 
-func parseRedundancy(s string) error {
-	if strings.TrimSpace(s) == "" {
-		// keep defaults
-		return nil
-	}
+func parseRedundancy(s string) (uint8, uint8, error) {
 	a, b, ok := strings.Cut(s, "-")
 	if !ok {
-		return fmt.Errorf("expected format 'data-parity', got %q", s)
+		return 0, 0, fmt.Errorf("expected format 'data-parity', got %q", s)
 	}
 	ad, err := strconv.Atoi(a)
 	if err != nil {
-		return fmt.Errorf("invalid data shards: %w", err)
+		return 0, 0, fmt.Errorf("invalid data shards: %w", err)
 	}
 	pd, err := strconv.Atoi(b)
 	if err != nil {
-		return fmt.Errorf("invalid parity shards: %w", err)
+		return 0, 0, fmt.Errorf("invalid parity shards: %w", err)
 	}
 	if ad < 1 || pd < 1 || ad*3 < ad+pd {
-		return fmt.Errorf("invalid redundancy configuration: %d-%d", ad, pd)
+		return 0, 0, fmt.Errorf("invalid redundancy configuration: %d-%d", ad, pd)
 	}
-	dataShards, parityShards = uint8(ad), uint8(pd)
-	return nil
+	return uint8(ad), uint8(pd), nil
 }
 
 func newLogger(level zap.AtomicLevel, path string) (*zap.Logger, error) {
