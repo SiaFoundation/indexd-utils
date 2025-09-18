@@ -16,6 +16,8 @@ import (
 	"syscall"
 	"time"
 
+	"crypto/pbkdf2"
+
 	proto "go.sia.tech/core/rhp/v4"
 	"go.sia.tech/core/types"
 	"go.sia.tech/coreutils/wallet"
@@ -23,7 +25,6 @@ import (
 	"go.sia.tech/indexd/sdk"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"golang.org/x/crypto/pbkdf2"
 	"lukechampine.com/frand"
 )
 
@@ -202,8 +203,10 @@ func loadPrivateKey(appSecret string) (types.PrivateKey, error) {
 	if appSecret == "" {
 		return types.PrivateKey{}, fmt.Errorf("app secret is required")
 	}
-	// PBKDF2(secret, salt, iter, keyLen, hash)
-	derived := pbkdf2.Key([]byte(appSecret), []byte("junkd-pk-salt"), 4096, 32, sha256.New)
+	derived, err := pbkdf2.Key(sha256.New, appSecret, []byte("junkd-pk-salt"), 4096, 32)
+	if err != nil {
+		return types.PrivateKey{}, fmt.Errorf("failed to derive key: %w", err)
+	}
 	var seed [32]byte
 	copy(seed[:], derived)
 	return wallet.KeyFromSeed(&seed, 0), nil
@@ -283,7 +286,7 @@ func parseFlags() config {
 	flag.StringVar(&cfg.logPath, "log.path", "", "the path to write the log to")
 	flag.IntVar(&cfg.threads, "threads", 1, "the number of upload threads")
 	flag.IntVar(&cfg.slabs, "slabs", 1, "the number of slabs to upload")
-	flag.StringVar(&cfg.redundancyStr, "redundancy", "2-4", "the redundancy configuration")
+	flag.StringVar(&cfg.redundancyStr, "redundancy", "10-20", "the redundancy configuration, in the form data-parity (e.g. 10-20 for 10 data and 20 parity shards)")
 	flag.DurationVar(&cfg.hostTimeout, "host.timeout", 10*time.Second, "the amount of time until we timeout a host during upload")
 	flag.Parse()
 	return cfg
