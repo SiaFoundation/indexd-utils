@@ -5,7 +5,7 @@ go 1.24.3
 require (
 	go.sia.tech/core v0.17.5
 	go.sia.tech/coreutils v0.18.5
-	go.sia.tech/indexd v0.0.3-0.20251003094931-0ade0078de96
+	go.sia.tech/indexd v0.0.3
 	go.uber.org/zap v1.27.0
 	lukechampine.com/frand v1.5.1
 )
