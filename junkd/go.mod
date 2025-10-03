@@ -4,8 +4,8 @@ go 1.24.3
 
 require (
 	go.sia.tech/core v0.17.5
-	go.sia.tech/coreutils v0.18.4
-	go.sia.tech/indexd v0.0.2
+	go.sia.tech/coreutils v0.18.5
+	go.sia.tech/indexd v0.0.3-0.20251003094931-0ade0078de96
 	go.uber.org/zap v1.27.0
 	lukechampine.com/frand v1.5.1
 )
@@ -20,7 +20,7 @@ require (
 	github.com/quic-go/quic-go v0.54.0 // indirect
 	github.com/quic-go/webtransport-go v0.9.0 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
-	go.sia.tech/jape v0.14.1-0.20250909191153-3486055546b3 // indirect
+	go.sia.tech/jape v0.14.1 // indirect
 	go.sia.tech/mux v1.4.0 // indirect
 	go.uber.org/mock v0.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
