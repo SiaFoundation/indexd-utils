@@ -2,6 +2,12 @@ FROM golang:1.24 AS builder
 
 WORKDIR /junkd
 
+# install git-lfs to support modules fetched via LFS
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git-lfs \
+    && git lfs install \
+    && rm -rf /var/lib/apt/lists/*
+
 # get dependencies
 COPY go.mod go.sum ./
 RUN go mod download
