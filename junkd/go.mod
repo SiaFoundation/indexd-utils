@@ -5,7 +5,7 @@ go 1.25
 require (
 	go.sia.tech/core v0.18.2-0.20251113164615-c42e113353ff
 	go.sia.tech/coreutils v0.18.8-0.20251113201657-ec81d054671b
-	go.sia.tech/indexd v0.0.4-0.20251117170111-629284e7fd25
+	go.sia.tech/indexd v0.0.4-0.20251118164342-ef2da724ca06
 	go.uber.org/zap v1.27.0
 	lukechampine.com/frand v1.5.1
 )
@@ -24,9 +24,9 @@ require (
 	go.sia.tech/mux v1.4.0 // indirect
 	go.uber.org/mock v0.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.43.0 // indirect
+	golang.org/x/crypto v0.44.0 // indirect
 	golang.org/x/net v0.46.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
-	golang.org/x/text v0.30.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 	golang.org/x/tools v0.38.0 // indirect
 )
