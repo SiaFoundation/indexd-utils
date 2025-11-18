@@ -38,6 +38,6 @@ jobs:
           context: ./junkd
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/siafoundation/junkd:master
+          tags: ghcr.io/siafoundation/indexd-utils:junkd-master
           cache-from: type=gha
           cache-to: type=gha,mode=max
