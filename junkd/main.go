@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"flag"
 	"fmt"
@@ -21,7 +22,6 @@ import (
 	proto "go.sia.tech/core/rhp/v4"
 	"go.sia.tech/core/types"
 	"go.sia.tech/coreutils/wallet"
-	"go.sia.tech/indexd/api/app"
 	"go.sia.tech/indexd/sdk"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -35,7 +35,8 @@ const (
 )
 
 type config struct {
-	appSecret     string
+	mnemonic      string
+	appKey        string
 	indexerURL    string
 	redundancyStr string
 
@@ -62,31 +63,55 @@ func main() {
 		log.Fatal("failed to parse redundancy", zap.Error(err))
 	}
 
-	sk, err := loadPrivateKey(cfg.appSecret)
-	if err != nil {
-		log.Fatal("failed to load private key", zap.Error(err))
+	// we only need the appKey but if neither mnemonic nor appKey is provided,
+	// we generate a new mnemonic to register
+	if cfg.mnemonic == "" && cfg.appKey == "" {
+		log.Info("no mnemonic provided, generating a new one")
+		cfg.mnemonic = sdk.NewSeedPhrase()
+		fmt.Println("Generated mnemonic (store this safely to reconnect later):", cfg.mnemonic)
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	resp, connected, err := sdk.Connect(ctx, cfg.indexerURL, sk, app.RegisterAppRequest{
+	builder := sdk.NewBuilder(cfg.indexerURL, sdk.AppMetadata{
+		ID:          types.HashBytes([]byte("junkd")),
 		Name:        "junkd Uploader",
 		Description: "A tool to upload junk data to the indexer",
 		LogoURL:     "https://example.com/logo.png",
 		ServiceURL:  "https://example.com/service",
 	})
-	if err != nil {
-		log.Fatal("failed to connect app", zap.Error(err))
-	} else if !connected {
-		log.Info("please approve app connection", zap.String("url", resp.ResponseURL))
-		connected, err := resp.WaitForApproval(ctx)
+
+	var sdkClient *sdk.SDK
+	if cfg.appKey != "" {
+		appKey, err := hex.DecodeString(cfg.appKey)
+		if err != nil {
+			log.Fatal("failed to decode app key", zap.Error(err))
+		}
+		// use existing app key
+		sdkClient, err = builder.SDK(appKey, sdk.WithLogger(log.Named("sdk")))
+		if err != nil {
+			log.Fatal("failed to create SDK from app key", zap.Error(err))
+		}
+	} else {
+		// register app
+		respURL, err := builder.RequestConnection(ctx)
+		if err != nil {
+			log.Fatal("failed to request app connection", zap.Error(err))
+		}
+		fmt.Println("Please approve the app connection by visiting the following URL:", respURL)
+		approved, err := builder.WaitForApproval(ctx)
 		if err != nil {
 			log.Fatal("failed to wait for app approval", zap.Error(err))
+		} else if !approved {
+			log.Info("app connection was declined")
+			os.Exit(0)
 		}
-		if !connected {
-			log.Fatal("user denied app connection")
+		sdkClient, err = builder.Register(ctx, cfg.mnemonic)
+		if err != nil {
+			log.Fatal("failed to register app", zap.Error(err))
 		}
+		fmt.Println("App registered successfully. App Key (store this safely to reconnect without re-registering later):", hex.EncodeToString(sdkClient.AppKey()[:]))
 	}
 
 	redundantSizePerBatch := int64((dataShards + parityShards)) * proto.SectorSize * int64(cfg.slabs)
@@ -99,11 +124,6 @@ func main() {
 		zap.String("redundant_size", humanReadableSize(redundantSizePerBatch)),
 		zap.Duration("host_timeout", cfg.hostTimeout),
 	)
-
-	sdkClient, err := sdk.NewSDK(cfg.indexerURL, sk, sdk.WithLogger(log.Named("sdk")))
-	if err != nil {
-		log.Fatal("failed to create SDK client", zap.Error(err))
-	}
 
 	// stats goroutine
 	var counter atomic.Uint64
@@ -298,7 +318,8 @@ func humanReadableSize(bytes int64) string {
 func parseFlags() config {
 	var cfg config
 	flag.StringVar(&cfg.indexerURL, "indexer.url", "http://localhost:9982", "the URL of the indexer API")
-	flag.StringVar(&cfg.appSecret, "app.secret", "", "a secret used to derive the application key")
+	flag.StringVar(&cfg.mnemonic, "app.mnemonic", "", "the mnemonic used to derive the application key (if this is not set, a new one will be generated)")
+	flag.StringVar(&cfg.appKey, "app.appKey", "", "the application private key in hex format (obtained during app registration)")
 	flag.TextVar(&cfg.logLevel, "log.level", zap.NewAtomicLevelAt(zap.InfoLevel), "the log level to use")
 	flag.StringVar(&cfg.logPath, "log.path", "", "the path to write the log to")
 	flag.IntVar(&cfg.threads, "threads", 1, "the number of upload threads")
