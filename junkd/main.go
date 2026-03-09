@@ -159,12 +159,17 @@ func uploadWorker(ctx context.Context, sdkClient *sdk.SDK, dataShards, paritySha
 		start := time.Now()
 		r := io.LimitReader(frand.Reader, dataSizePerBatch)
 
-		_, err := sdkClient.Upload(
+		obj := sdk.NewEmptyObject()
+		err := sdkClient.Upload(
 			ctx,
+			&obj,
 			r,
 			sdk.WithRedundancy(dataShards, parityShards),
 			sdk.WithUploadHostTimeout(hostTimeout),
 		)
+		if err := sdkClient.SaveObject(ctx, obj); err != nil {
+			log.Error("failed to save object after upload", zap.Error(err))
+		}
 
 		switch {
 		case err == nil:
