@@ -167,8 +167,8 @@ func uploadWorker(ctx context.Context, sdkClient *sdk.SDK, dataShards, paritySha
 			sdk.WithRedundancy(dataShards, parityShards),
 			sdk.WithUploadHostTimeout(hostTimeout),
 		)
-		if err := sdkClient.SaveObject(ctx, obj); err != nil {
-			log.Error("failed to save object after upload", zap.Error(err))
+		if err := sdkClient.PinObject(ctx, obj); err != nil {
+			log.Error("failed to pin object after upload", zap.Error(err))
 		}
 
 		switch {
