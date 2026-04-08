@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	go.sia.tech/core v0.19.1-0.20260326151920-bbeb92b26458
 	go.sia.tech/coreutils v0.21.2-0.20260327081620-0c3739d3b615
-	go.sia.tech/siastorage v0.0.2
+	go.sia.tech/siastorage v0.0.3-0.20260408144318-1b939ff0ebe3
 	go.uber.org/zap v1.27.1
 	lukechampine.com/frand v1.5.1
 )
@@ -20,7 +20,7 @@ require (
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/quic-go/quic-go v0.59.0 // indirect
 	github.com/quic-go/webtransport-go v0.10.0 // indirect
-	go.sia.tech/indexd v0.1.1-0.20260408071107-3e969df95747 // indirect
+	go.sia.tech/indexd v0.1.1-0.20260408142741-3ec7d3af7e4c // indirect
 	go.sia.tech/jape v0.14.1 // indirect
 	go.sia.tech/mux v1.5.0 // indirect
 	go.uber.org/mock v0.6.0 // indirect
