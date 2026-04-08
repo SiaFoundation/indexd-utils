@@ -6,6 +6,7 @@ WORKDIR /junkd
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git-lfs \
     && git lfs install
+ENV GOPRIVATE=go.sia.tech/indexd
 
 # get dependencies
 COPY go.mod go.sum ./
