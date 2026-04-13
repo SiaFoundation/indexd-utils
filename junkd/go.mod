@@ -3,9 +3,9 @@ module go.sia.tech/indexd-utils
 go 1.26.0
 
 require (
-	go.sia.tech/core v0.19.1-0.20260326151920-bbeb92b26458
-	go.sia.tech/coreutils v0.21.2-0.20260327081620-0c3739d3b615
-	go.sia.tech/siastorage v0.0.3-0.20260408144318-1b939ff0ebe3
+	go.sia.tech/core v0.19.1
+	go.sia.tech/coreutils v0.21.2
+	go.sia.tech/siastorage v0.0.3
 	go.uber.org/zap v1.27.1
 	lukechampine.com/frand v1.5.1
 )
@@ -25,10 +25,10 @@ require (
 	go.sia.tech/mux v1.5.0 // indirect
 	go.uber.org/mock v0.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.49.0 // indirect
+	golang.org/x/crypto v0.50.0 // indirect
 	golang.org/x/net v0.52.0 // indirect
-	golang.org/x/sys v0.42.0 // indirect
-	golang.org/x/text v0.35.0 // indirect
+	golang.org/x/sys v0.43.0 // indirect
+	golang.org/x/text v0.36.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.43.0 // indirect
 )
