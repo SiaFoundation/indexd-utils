@@ -4,8 +4,8 @@ go 1.26.0
 
 require (
 	go.sia.tech/core v0.21.0
-	go.sia.tech/coreutils v0.22.0
-	go.sia.tech/siastorage v0.0.3
+	go.sia.tech/coreutils v0.22.1-0.20260513143633-9856f6e895bd
+	go.sia.tech/siastorage v0.1.0
 	go.uber.org/zap v1.28.0
 	lukechampine.com/frand v1.5.1
 )
@@ -14,15 +14,15 @@ require (
 	github.com/dunglas/httpsfv v1.1.0 // indirect
 	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
-	github.com/klauspost/reedsolomon v1.13.3 // indirect
+	github.com/klauspost/reedsolomon v1.14.0 // indirect
 	github.com/oschwald/geoip2-golang v1.13.0 // indirect
 	github.com/oschwald/maxminddb-golang v1.13.1 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/quic-go/quic-go v0.59.1 // indirect
 	github.com/quic-go/webtransport-go v0.10.1-0.20260312060737-05fe5253a73c // indirect
-	go.sia.tech/indexd v0.1.1-0.20260408142741-3ec7d3af7e4c // indirect
+	go.sia.tech/indexd v0.2.3-0.20260519120331-4eab507a9847 // indirect
 	go.sia.tech/jape v0.14.1 // indirect
-	go.sia.tech/mux v1.5.0 // indirect
+	go.sia.tech/mux v1.5.1 // indirect
 	go.uber.org/mock v0.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.51.0 // indirect
