@@ -100,12 +100,11 @@ func main() {
 			log.Fatal("failed to request app connection", zap.Error(err))
 		}
 		fmt.Println("Please approve the app connection by visiting the following URL:", respURL)
-		approved, err := builder.WaitForApproval(ctx)
-		if err != nil {
-			log.Fatal("failed to wait for app approval", zap.Error(err))
-		} else if !approved {
+		if err := builder.WaitForApproval(ctx); errors.Is(err, sdk.ErrUserRejected) {
 			log.Info("app connection was declined")
 			os.Exit(0)
+		} else if err != nil {
+			log.Fatal("failed to wait for app approval", zap.Error(err))
 		}
 		sdkClient, err = builder.Register(ctx, cfg.mnemonic)
 		if err != nil {
@@ -321,7 +320,7 @@ func humanReadableSize(bytes int64) string {
 
 func parseFlags() config {
 	var cfg config
-	flag.StringVar(&cfg.indexerURL, "indexer.url", "http://localhost:9982", "the URL of the indexer API")
+	flag.StringVar(&cfg.indexerURL, "indexer.url", "https://sia.storage", "the URL of the indexer API")
 	flag.StringVar(&cfg.mnemonic, "app.mnemonic", "", "the mnemonic used to derive the application key (if this is not set, a new one will be generated)")
 	flag.StringVar(&cfg.appKey, "app.appKey", "", "the application private key in hex format (obtained during app registration)")
 	flag.TextVar(&cfg.logLevel, "log.level", zap.NewAtomicLevelAt(zap.InfoLevel), "the log level to use")
